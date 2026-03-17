@@ -1,72 +1,65 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { PetState } from '../App'
 import { SHOP_ITEMS, JOBS, ShopItem, Job } from '../gameData'
 import './GameScreen.css'
 
-type ScreenMode = 'pet' | 'shop' | 'bag' | 'work' | 'game'
-type MiniGame = 'select' | 'reaction' | 'leftright' | 'simon'
-type GamePhase = 'ready' | 'playing' | 'result'
+type ScreenMode = 'pet' | 'stats' | 'feed' | 'work'
 
 interface GameScreenProps {
   petState: PetState
   coins: number
   inventory: { [itemId: string]: number }
-  onBuyItem: (item: ShopItem) => void
   onUseItem: (item: ShopItem) => void
   onWorkComplete: (reward: number, energyCost: number) => void
-  onGameReward: (reward: number) => void
   animation: string | null
 }
 
-// Simple pet sprites
-const SPRITES = {
+// Larger pet sprite (16x16)
+const PET_SPRITE = {
   idle1: [
-    [0,0,0,1,1,1,1,0,0,0],
-    [0,0,1,1,1,1,1,1,0,0],
-    [0,1,1,0,1,1,0,1,1,0],
-    [0,1,1,1,1,1,1,1,1,0],
-    [0,1,0,1,1,1,1,0,1,0],
-    [0,0,1,1,0,0,1,1,0,0],
-    [0,0,0,1,1,1,1,0,0,0],
-    [0,0,1,1,1,1,1,1,0,0],
-    [0,1,1,0,0,0,0,1,1,0],
-    [0,1,0,0,0,0,0,0,1,0],
+    '                ',
+    '     ####       ',
+    '   ########     ',
+    '  ##########    ',
+    '  ##  ##  ##    ',
+    '  ##########    ',
+    '  ##  ##  ##    ',
+    '   ########     ',
+    '    ######      ',
+    '   ########     ',
+    '  ##########    ',
+    '  ##  ##  ##    ',
+    '  ##      ##    ',
+    '  ##      ##    ',
+    '                ',
+    '                ',
   ],
   idle2: [
-    [0,0,0,1,1,1,1,0,0,0],
-    [0,0,1,1,1,1,1,1,0,0],
-    [0,1,1,0,1,1,0,1,1,0],
-    [0,1,1,1,1,1,1,1,1,0],
-    [0,1,0,1,1,1,1,0,1,0],
-    [0,0,1,1,0,0,1,1,0,0],
-    [0,0,0,1,1,1,1,0,0,0],
-    [0,0,1,1,1,1,1,1,0,0],
-    [0,0,1,0,0,0,0,1,0,0],
-    [0,0,0,0,0,0,0,0,0,0],
+    '                ',
+    '     ####       ',
+    '   ########     ',
+    '  ##########    ',
+    '  ##  ##  ##    ',
+    '  ##########    ',
+    '  ##  ##  ##    ',
+    '   ########     ',
+    '    ######      ',
+    '   ########     ',
+    '  ##########    ',
+    '   ##    ##     ',
+    '   ##    ##     ',
+    '                ',
+    '                ',
+    '                ',
   ],
 }
-
-const MINI_GAMES = [
-  { id: 'reaction', name: 'Reaction', icon: '⚡', desc: 'Test reflexes!' },
-  { id: 'leftright', name: 'Guess', icon: '🎯', desc: 'Left or right?' },
-  { id: 'simon', name: 'Simon', icon: '🧠', desc: 'Remember!' },
-]
-
-// ASCII Animations
-const SPINNER_FRAMES = ['|', '/', '-', '\\']
-const DOTS_FRAMES = ['.  ', '.. ', '...', '   ']
-const WAVE_FRAMES = ['~', '≈', '~', '≋']
-const ZZZ_FRAMES = ['z', 'zZ', 'zZz', 'zZzZ']
-const HEART_FRAMES = ['♡', '♥', '♡', '♥']
 
 export function GameScreen({
   petState,
   coins,
   inventory,
-  onBuyItem,
   onUseItem,
   onWorkComplete,
-  onGameReward,
   animation
 }: GameScreenProps) {
   const [mode, setMode] = useState<ScreenMode>('pet')
@@ -77,37 +70,11 @@ export function GameScreen({
   const [activeJob, setActiveJob] = useState<Job | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
-  // Mini-game state
-  const [currentGame, setCurrentGame] = useState<MiniGame>('select')
-  const [gamePhase, setGamePhase] = useState<GamePhase>('ready')
-  const [gameScore, setGameScore] = useState(0)
-  const [gameRound, setGameRound] = useState(0)
-
-  // Reaction game
-  const [reactionStart, setReactionStart] = useState(0)
-  const [reactionShow, setReactionShow] = useState(false)
-  const [reactionTimes, setReactionTimes] = useState<number[]>([])
-
-  // Left/Right game
-  const [hiddenSide, setHiddenSide] = useState<'left' | 'right'>('left')
-  const [playerGuess, setPlayerGuess] = useState<'left' | 'right' | null>(null)
-  const [guessResult, setGuessResult] = useState<boolean | null>(null)
-
-  // Simon game
-  const [simonSequence, setSimonSequence] = useState<number[]>([])
-  const [simonInput, setSimonInput] = useState<number[]>([])
-  const [simonShowIndex, setSimonShowIndex] = useState(-1)
-  const [simonHighlight, setSimonHighlight] = useState<number | null>(null)
-
-  // ASCII animation frame
-  const [asciiFrame, setAsciiFrame] = useState(0)
-
-  // Animation frames (pet + ASCII)
+  // Animation tick
   useEffect(() => {
     const interval = setInterval(() => {
       setFrame(f => (f + 1) % 2)
-      setAsciiFrame(f => (f + 1) % 4)
-    }, 150)
+    }, 500)
     return () => clearInterval(interval)
   }, [])
 
@@ -121,7 +88,7 @@ export function GameScreen({
         if (newProgress >= 100) {
           setIsWorking(false)
           onWorkComplete(activeJob.reward, activeJob.energyCost)
-          showMessage(`+$${activeJob.reward}!`)
+          showMessage(`+${activeJob.reward} coins!`)
           setActiveJob(null)
           return 0
         }
@@ -132,472 +99,185 @@ export function GameScreen({
     return () => clearInterval(interval)
   }, [isWorking, activeJob, onWorkComplete])
 
-  // Message timeout
   const showMessage = (msg: string) => {
     setMessage(msg)
     setTimeout(() => setMessage(null), 1500)
   }
 
-  // Reset game state
-  const resetGame = () => {
-    setGamePhase('ready')
-    setGameScore(0)
-    setGameRound(0)
-    setReactionTimes([])
-    setSimonSequence([])
-    setSimonInput([])
-    setPlayerGuess(null)
-    setGuessResult(null)
-  }
-
-  // ============ REACTION GAME ============
-  const startReactionRound = useCallback(() => {
-    setReactionShow(false)
-    setGamePhase('playing')
-
-    // Random delay 1-3 seconds
-    const delay = 1000 + Math.random() * 2000
-    setTimeout(() => {
-      setReactionStart(Date.now())
-      setReactionShow(true)
-    }, delay)
-  }, [])
-
-  const handleReactionTap = () => {
-    if (!reactionShow) {
-      // Too early!
-      showMessage('Too early!')
-      return
+  // Get current list items
+  const getItems = (): (ShopItem | Job)[] => {
+    if (mode === 'feed') {
+      // Show owned food items
+      return SHOP_ITEMS.filter(item =>
+        item.type === 'food' && (inventory[item.id] || 0) > 0
+      )
     }
-
-    const reactionTime = Date.now() - reactionStart
-    const newTimes = [...reactionTimes, reactionTime]
-    setReactionTimes(newTimes)
-    setReactionShow(false)
-
-    if (newTimes.length >= 5) {
-      // Game over - calculate score
-      const avgTime = newTimes.reduce((a, b) => a + b, 0) / newTimes.length
-      let reward = 0
-      if (avgTime < 300) reward = 30
-      else if (avgTime < 400) reward = 20
-      else if (avgTime < 500) reward = 15
-      else reward = 10
-
-      setGameScore(reward)
-      setGamePhase('result')
-      onGameReward(reward)
-    } else {
-      setGameRound(newTimes.length)
-      setTimeout(startReactionRound, 500)
-    }
-  }
-
-  // ============ LEFT/RIGHT GAME ============
-  const startLeftRightRound = useCallback(() => {
-    setHiddenSide(Math.random() > 0.5 ? 'left' : 'right')
-    setPlayerGuess(null)
-    setGuessResult(null)
-    setGamePhase('playing')
-  }, [])
-
-  const handleGuess = (guess: 'left' | 'right') => {
-    if (playerGuess !== null) return
-
-    setPlayerGuess(guess)
-    const correct = guess === hiddenSide
-    setGuessResult(correct)
-
-    const newScore = correct ? gameScore + 1 : gameScore
-    setGameScore(newScore)
-    setGameRound(gameRound + 1)
-
-    setTimeout(() => {
-      if (gameRound + 1 >= 5) {
-        // Game over
-        const reward = newScore * 5
-        setGameScore(reward)
-        setGamePhase('result')
-        onGameReward(reward)
-      } else {
-        startLeftRightRound()
-      }
-    }, 1000)
-  }
-
-  // ============ SIMON GAME ============
-  const startSimonRound = useCallback(() => {
-    const newSeq = [...simonSequence, Math.floor(Math.random() * 4)]
-    setSimonSequence(newSeq)
-    setSimonInput([])
-    setGamePhase('playing')
-
-    // Show sequence
-    let i = 0
-    setSimonShowIndex(0)
-    const showInterval = setInterval(() => {
-      if (i < newSeq.length) {
-        setSimonHighlight(newSeq[i])
-        setTimeout(() => setSimonHighlight(null), 300)
-        i++
-        setSimonShowIndex(i)
-      } else {
-        clearInterval(showInterval)
-        setSimonShowIndex(-1)
-      }
-    }, 600)
-  }, [simonSequence])
-
-  const handleSimonInput = (btn: number) => {
-    if (simonShowIndex !== -1) return // Still showing sequence
-
-    const newInput = [...simonInput, btn]
-    setSimonInput(newInput)
-    setSimonHighlight(btn)
-    setTimeout(() => setSimonHighlight(null), 150)
-
-    // Check if correct so far
-    const idx = newInput.length - 1
-    if (newInput[idx] !== simonSequence[idx]) {
-      // Wrong! Game over
-      const reward = Math.max(0, (simonSequence.length - 1) * 8)
-      setGameScore(reward)
-      setGamePhase('result')
-      if (reward > 0) onGameReward(reward)
-      return
-    }
-
-    // Completed sequence?
-    if (newInput.length === simonSequence.length) {
-      setGameRound(simonSequence.length)
-      setTimeout(() => startSimonRound(), 800)
-    }
-  }
-
-  // Start mini-game
-  const startMiniGame = (gameId: string) => {
-    resetGame()
-    setCurrentGame(gameId as MiniGame)
-
-    if (gameId === 'reaction') {
-      setTimeout(startReactionRound, 500)
-    } else if (gameId === 'leftright') {
-      setTimeout(startLeftRightRound, 500)
-    } else if (gameId === 'simon') {
-      setTimeout(startSimonRound, 500)
-    }
-  }
-
-  // Get items for current mode
-  const getItems = () => {
-    if (mode === 'shop') return SHOP_ITEMS
-    if (mode === 'bag') return SHOP_ITEMS.filter(item => (inventory[item.id] || 0) > 0)
     if (mode === 'work') return JOBS
-    if (mode === 'game' && currentGame === 'select') return MINI_GAMES
     return []
   }
 
   const items = getItems()
 
-  // Handle action button
-  const handleAction = () => {
-    if (mode === 'pet') return
+  // Handle select/action
+  const handleSelect = () => {
+    if (mode === 'pet' || mode === 'stats') return
 
-    if (mode === 'game') {
-      if (currentGame === 'select') {
-        startMiniGame(MINI_GAMES[selectedIndex].id)
-      } else if (currentGame === 'reaction' && reactionShow) {
-        handleReactionTap()
-      } else if (gamePhase === 'result') {
-        setCurrentGame('select')
-        resetGame()
-      }
-      return
-    }
-
-    if (mode === 'shop') {
-      const item = SHOP_ITEMS[selectedIndex]
-      if (item && coins >= item.price) {
-        onBuyItem(item)
-        showMessage(`Bought ${item.icon}!`)
-      } else {
-        showMessage('No money!')
-      }
-    }
-
-    if (mode === 'bag') {
-      const ownedItems = SHOP_ITEMS.filter(item => (inventory[item.id] || 0) > 0)
-      const item = ownedItems[selectedIndex]
+    if (mode === 'feed' && items.length > 0) {
+      const item = items[selectedIndex] as ShopItem
       if (item) {
         onUseItem(item)
-        showMessage(`Used ${item.icon}!`)
+        showMessage('nom nom!')
+        // Check if item is now empty
+        if ((inventory[item.id] || 0) <= 1) {
+          setSelectedIndex(Math.max(0, selectedIndex - 1))
+        }
       }
     }
 
     if (mode === 'work' && !isWorking) {
-      const job = JOBS[selectedIndex]
+      const job = items[selectedIndex] as Job
       if (job && petState.energy >= job.energyCost) {
         setActiveJob(job)
         setWorkProgress(0)
         setIsWorking(true)
       } else {
-        showMessage('Too tired!')
+        showMessage('too tired!')
       }
     }
   }
 
-  // Navigate items
+  // Navigation
   const handleUp = () => {
-    if (mode === 'pet') return
-    if (mode === 'game' && currentGame === 'leftright' && gamePhase === 'playing') {
-      handleGuess('left')
-      return
+    if (items.length > 0) {
+      setSelectedIndex(i => (i - 1 + items.length) % items.length)
     }
-    if (mode === 'game' && currentGame === 'simon' && simonShowIndex === -1) {
-      handleSimonInput(0) // Up = 0
-      return
-    }
-    setSelectedIndex(i => Math.max(0, i - 1))
   }
 
   const handleDown = () => {
-    if (mode === 'pet') return
-    if (mode === 'game' && currentGame === 'leftright' && gamePhase === 'playing') {
-      handleGuess('right')
-      return
+    if (items.length > 0) {
+      setSelectedIndex(i => (i + 1) % items.length)
     }
-    if (mode === 'game' && currentGame === 'simon' && simonShowIndex === -1) {
-      handleSimonInput(1) // Down = 1
-      return
-    }
-    setSelectedIndex(i => Math.min(items.length - 1, i + 1))
   }
 
-  // Cycle through modes
-  const cycleMode = () => {
-    if (isWorking) return
-    if (mode === 'game' && currentGame !== 'select' && gamePhase !== 'result') {
-      // Exit current game
-      setCurrentGame('select')
-      resetGame()
-      return
-    }
-    const modes: ScreenMode[] = ['pet', 'bag', 'shop', 'work', 'game']
-    const currentIndex = modes.indexOf(mode)
-    const nextMode = modes[(currentIndex + 1) % modes.length]
-    setMode(nextMode)
+  // Mode buttons
+  const setModeAndReset = (newMode: ScreenMode) => {
+    if (isWorking && newMode !== 'work') return
+    setMode(newMode)
     setSelectedIndex(0)
-    if (nextMode === 'game') {
-      setCurrentGame('select')
-      resetGame()
-    }
   }
 
-  // Render pet view
+  // Render ASCII pet
   const renderPet = () => {
-    const sprite = frame === 0 ? SPRITES.idle1 : SPRITES.idle2
-    const pixelSize = 10
-
-    // Choose ASCII decoration based on pet state
-    const isHappy = petState.happiness > 70
-    const isTired = petState.energy < 30
-    const isHungry = petState.hunger < 30
+    const sprite = frame === 0 ? PET_SPRITE.idle1 : PET_SPRITE.idle2
 
     return (
-      <div className="pet-view">
-        {/* ASCII decorations */}
-        <div className="ascii-decor">
-          {isHappy && <span className="decor-left">{HEART_FRAMES[asciiFrame]}</span>}
-          {isTired && <span className="decor-right">{ZZZ_FRAMES[asciiFrame]}</span>}
-          {isHungry && <span className="decor-bottom">hungry{DOTS_FRAMES[asciiFrame]}</span>}
-        </div>
-
-        <div
-          className={`sprite ${animation || ''}`}
-          style={{ width: sprite[0].length * pixelSize, height: sprite.length * pixelSize }}
-        >
-          {sprite.map((row, y) =>
-            row.map((pixel, x) =>
-              pixel ? (
-                <div
-                  key={`${x}-${y}`}
-                  className="pixel"
-                  style={{
-                    left: x * pixelSize,
-                    top: y * pixelSize,
-                    width: pixelSize,
-                    height: pixelSize,
-                  }}
-                />
-              ) : null
-            )
-          )}
-        </div>
-        {animation === 'eat' && <div className="effect">nom!</div>}
-        {animation === 'play' && <div className="effect">yay!</div>}
-        {animation === 'heal' && <div className="effect">+hp</div>}
+      <div className="pet-area">
+        <pre className={`pet-sprite ${animation || ''}`}>
+          {sprite.join('\n')}
+        </pre>
+        {animation && (
+          <div className="pet-action">
+            {animation === 'eat' && '* nom *'}
+            {animation === 'play' && '* yay *'}
+            {animation === 'heal' && '* +hp *'}
+          </div>
+        )}
       </div>
     )
   }
 
-  // Render mini-game
-  const renderMiniGame = () => {
-    // Game selection
-    if (currentGame === 'select') {
-      return (
-        <div className="item-list">
-          {MINI_GAMES.map((game, idx) => (
-            <div
-              key={game.id}
-              className={`list-item ${idx === selectedIndex ? 'selected' : ''}`}
-            >
-              <span className="item-icon">{game.icon}</span>
-              <span className="item-name">{game.name}</span>
-              <span className="item-desc-small">{game.desc}</span>
-            </div>
-          ))}
-        </div>
-      )
+  // Render stats
+  const renderStats = () => {
+    const bar = (value: number) => {
+      const filled = Math.floor(value / 10)
+      return '[' + '#'.repeat(filled) + '-'.repeat(10 - filled) + ']'
     }
-
-    // Result screen
-    if (gamePhase === 'result') {
-      return (
-        <div className="game-result">
-          <div className="result-title">DONE!</div>
-          <div className="result-score">+${gameScore}</div>
-          <div className="result-hint">Press OK</div>
-        </div>
-      )
-    }
-
-    // REACTION GAME
-    if (currentGame === 'reaction') {
-      return (
-        <div className="minigame-area">
-          <div className="game-info">Round {reactionTimes.length + 1}/5</div>
-          <div className={`reaction-circle ${reactionShow ? 'show' : ''}`}>
-            {reactionShow ? '!' : SPINNER_FRAMES[asciiFrame]}
-          </div>
-          <div className="game-hint">
-            {reactionShow ? '>>> TAP OK! <<<' : `Wait${DOTS_FRAMES[asciiFrame]}`}
-          </div>
-        </div>
-      )
-    }
-
-    // LEFT/RIGHT GAME
-    if (currentGame === 'leftright') {
-      return (
-        <div className="minigame-area">
-          <div className="game-info">Round {gameRound + 1}/5 | Score: {gameScore}</div>
-          <div className="hands-container">
-            <div className={`hand left ${playerGuess === 'left' ? (guessResult ? 'correct' : 'wrong') : ''}`}>
-              {playerGuess !== null && hiddenSide === 'left' ? '🪙' : '✊'}
-            </div>
-            <div className={`hand right ${playerGuess === 'right' ? (guessResult ? 'correct' : 'wrong') : ''}`}>
-              {playerGuess !== null && hiddenSide === 'right' ? '🪙' : '✊'}
-            </div>
-          </div>
-          <div className="game-hint">
-            {playerGuess === null ? '▲ Left  |  ▼ Right' : (guessResult ? 'Correct!' : 'Wrong!')}
-          </div>
-        </div>
-      )
-    }
-
-    // SIMON GAME
-    if (currentGame === 'simon') {
-      const buttons = ['▲', '▼', '◀', '▶']
-      return (
-        <div className="minigame-area">
-          <div className="game-info">Length: {simonSequence.length}</div>
-          <div className="simon-grid">
-            {buttons.map((btn, idx) => (
-              <div
-                key={idx}
-                className={`simon-btn ${simonHighlight === idx ? 'highlight' : ''}`}
-              >
-                {btn}
-              </div>
-            ))}
-          </div>
-          <div className="game-hint">
-            {simonShowIndex !== -1
-              ? `${WAVE_FRAMES[asciiFrame]} Watch ${WAVE_FRAMES[asciiFrame]}`
-              : 'Repeat! ▲▼ then OK'}
-          </div>
-        </div>
-      )
-    }
-
-    return null
-  }
-
-  // Render list view (shop/bag/work)
-  const renderList = () => {
-    if (mode === 'game') {
-      return renderMiniGame()
-    }
-
-    if (isWorking && activeJob) {
-      return (
-        <div className="work-progress">
-          <div className="work-spinner">{SPINNER_FRAMES[asciiFrame]}</div>
-          <div className="work-icon">{activeJob.icon}</div>
-          <div className="work-bar">
-            <div className="work-fill" style={{ width: `${workProgress}%` }} />
-          </div>
-          <div className="work-status">
-            <span className="work-percent">{Math.floor(workProgress)}%</span>
-            <span className="work-dots">{DOTS_FRAMES[asciiFrame]}</span>
-          </div>
-        </div>
-      )
-    }
-
-    const displayItems = mode === 'bag'
-      ? SHOP_ITEMS.filter(item => (inventory[item.id] || 0) > 0)
-      : mode === 'work'
-        ? JOBS
-        : SHOP_ITEMS
-
-    if (displayItems.length === 0) {
-      return <div className="empty-list">Empty!</div>
-    }
-
-    // Show 4 items at a time with scroll
-    const startIndex = Math.max(0, Math.min(selectedIndex - 1, displayItems.length - 4))
-    const visibleItems = displayItems.slice(startIndex, startIndex + 4)
 
     return (
-      <div className="item-list">
-        {visibleItems.map((item, idx) => {
-          const actualIndex = startIndex + idx
-          const isSelected = actualIndex === selectedIndex
+      <div className="stats-area">
+        <div className="stat-row">
+          <span className="stat-label">HUNGER</span>
+          <span className="stat-bar">{bar(petState.hunger)}</span>
+          <span className="stat-value">{Math.floor(petState.hunger)}</span>
+        </div>
+        <div className="stat-row">
+          <span className="stat-label">HAPPY</span>
+          <span className="stat-bar">{bar(petState.happiness)}</span>
+          <span className="stat-value">{Math.floor(petState.happiness)}</span>
+        </div>
+        <div className="stat-row">
+          <span className="stat-label">ENERGY</span>
+          <span className="stat-bar">{bar(petState.energy)}</span>
+          <span className="stat-value">{Math.floor(petState.energy)}</span>
+        </div>
+        <div className="stat-row">
+          <span className="stat-label">HEALTH</span>
+          <span className="stat-bar">{bar(petState.health)}</span>
+          <span className="stat-value">{Math.floor(petState.health)}</span>
+        </div>
+        <div className="stat-coins">
+          COINS: {coins}
+        </div>
+      </div>
+    )
+  }
 
-          if (mode === 'work') {
-            const job = item as Job
-            const canWork = petState.energy >= job.energyCost
-            return (
-              <div key={job.id} className={`list-item ${isSelected ? 'selected' : ''} ${!canWork ? 'disabled' : ''}`}>
-                <span className="item-icon">{job.icon}</span>
-                <span className="item-name">{job.name}</span>
-                <span className="item-price">+${job.reward}</span>
-              </div>
-            )
-          }
+  // Render feed menu
+  const renderFeed = () => {
+    const foodItems = SHOP_ITEMS.filter(item =>
+      item.type === 'food' && (inventory[item.id] || 0) > 0
+    )
 
-          const shopItem = item as ShopItem
-          const count = inventory[shopItem.id] || 0
-          const canAfford = mode === 'shop' ? coins >= shopItem.price : count > 0
+    if (foodItems.length === 0) {
+      return (
+        <div className="empty-message">
+          NO FOOD!
+          <div className="empty-hint">buy at shop</div>
+        </div>
+      )
+    }
 
+    return (
+      <div className="menu-list">
+        {foodItems.map((item, idx) => (
+          <div
+            key={item.id}
+            className={`menu-item ${idx === selectedIndex ? 'selected' : ''}`}
+          >
+            <span className="menu-name">{item.name.toUpperCase()}</span>
+            <span className="menu-count">x{inventory[item.id]}</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Render work menu
+  const renderWork = () => {
+    if (isWorking && activeJob) {
+      const progressBar = '[' + '='.repeat(Math.floor(workProgress / 10)) +
+                          '-'.repeat(10 - Math.floor(workProgress / 10)) + ']'
+      return (
+        <div className="work-area">
+          <div className="work-title">{activeJob.name.toUpperCase()}</div>
+          <div className="work-progress-bar">{progressBar}</div>
+          <div className="work-percent">{Math.floor(workProgress)}%</div>
+          <div className="work-reward">REWARD: +{activeJob.reward}</div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="menu-list">
+        {JOBS.map((job, idx) => {
+          const canWork = petState.energy >= job.energyCost
           return (
-            <div key={shopItem.id} className={`list-item ${isSelected ? 'selected' : ''} ${!canAfford ? 'disabled' : ''}`}>
-              <span className="item-icon">{shopItem.icon}</span>
-              <span className="item-name">{shopItem.name}</span>
-              {mode === 'shop' && <span className="item-price">${shopItem.price}</span>}
-              {mode === 'bag' && <span className="item-count">x{count}</span>}
+            <div
+              key={job.id}
+              className={`menu-item ${idx === selectedIndex ? 'selected' : ''} ${!canWork ? 'disabled' : ''}`}
+            >
+              <span className="menu-name">{job.name.toUpperCase()}</span>
+              <span className="menu-info">+{job.reward} / -{job.energyCost}E</span>
             </div>
           )
         })}
@@ -605,57 +285,118 @@ export function GameScreen({
     )
   }
 
-  // Handle Simon extra buttons via OK
-  const handleOkForSimon = () => {
-    if (currentGame === 'simon' && simonShowIndex === -1 && gamePhase === 'playing') {
-      // Use OK as additional input (alternates between 2 and 3)
-      handleSimonInput(simonInput.length % 2 === 0 ? 2 : 3)
-      return true
+  // Render main content based on mode
+  const renderContent = () => {
+    switch (mode) {
+      case 'pet': return renderPet()
+      case 'stats': return renderStats()
+      case 'feed': return renderFeed()
+      case 'work': return renderWork()
     }
-    return false
-  }
-
-  const wrappedHandleAction = () => {
-    if (handleOkForSimon()) return
-    handleAction()
   }
 
   return (
-    <div className="game-screen-container">
-      <div className="game-device">
-        {/* Screen */}
-        <div className="game-display">
-          {/* Header */}
-          <div className="screen-header">
-            <span className="header-mode">
-              {mode === 'game' && currentGame !== 'select'
-                ? currentGame.toUpperCase()
-                : mode.toUpperCase()}
-            </span>
-            <span className="header-coins">${coins}</span>
-          </div>
-
-          {/* Content */}
-          <div className="screen-content">
-            {mode === 'pet' ? renderPet() : renderList()}
-          </div>
-
-          {/* Message overlay */}
-          {message && <div className="screen-message">{message}</div>}
+    <div className="game-fullscreen">
+      {/* Main LCD Screen */}
+      <div className="lcd-screen">
+        {/* Header */}
+        <div className="lcd-header">
+          <span className="header-title">DAMAGOTCHI</span>
+          <span className="header-coins">${coins}</span>
         </div>
 
-        {/* Controls */}
-        <div className="game-controls">
-          <button className="ctrl-btn" onClick={cycleMode} disabled={isWorking}>
-            {mode === 'game' && currentGame !== 'select' ? 'BACK' : 'MODE'}
+        {/* Content */}
+        <div className="lcd-content">
+          {renderContent()}
+        </div>
+
+        {/* Message */}
+        {message && <div className="lcd-message">{message}</div>}
+      </div>
+
+      {/* Controls - Gamepad style */}
+      <div className="controls">
+        {/* Top row: Menu icons */}
+        <div className="menu-icons">
+          <button
+            className={`menu-icon ${mode === 'pet' ? 'active' : ''}`}
+            onClick={() => setModeAndReset('pet')}
+            disabled={isWorking && mode !== 'pet'}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="8" r="5"/>
+              <path d="M12 14c-5 0-9 2-9 5v2h18v-2c0-3-4-5-9-5z"/>
+            </svg>
           </button>
-          <div className="ctrl-arrows">
-            <button className="ctrl-btn small" onClick={handleUp}>▲</button>
-            <button className="ctrl-btn small" onClick={handleDown}>▼</button>
+          <button
+            className={`menu-icon ${mode === 'stats' ? 'active' : ''}`}
+            onClick={() => setModeAndReset('stats')}
+            disabled={isWorking && mode !== 'stats'}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <rect x="3" y="12" width="4" height="9"/>
+              <rect x="10" y="6" width="4" height="15"/>
+              <rect x="17" y="3" width="4" height="18"/>
+            </svg>
+          </button>
+          <button
+            className={`menu-icon ${mode === 'feed' ? 'active' : ''}`}
+            onClick={() => setModeAndReset('feed')}
+            disabled={isWorking && mode !== 'feed'}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <ellipse cx="12" cy="15" rx="8" ry="6"/>
+              <path d="M8 9c0-3 2-6 4-6s4 3 4 6"/>
+            </svg>
+          </button>
+          <button
+            className={`menu-icon ${mode === 'work' ? 'active' : ''}`}
+            onClick={() => setModeAndReset('work')}
+            disabled={isWorking && mode !== 'work'}
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <rect x="2" y="7" width="20" height="14" rx="2"/>
+              <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Bottom row: D-pad + Action buttons */}
+        <div className="gamepad">
+          {/* D-Pad */}
+          <div className="dpad">
+            <button className="dpad-btn dpad-up" onClick={handleUp}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4l-8 8h16z"/>
+              </svg>
+            </button>
+            <button className="dpad-btn dpad-left" onClick={handleUp}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 12l8-8v16z"/>
+              </svg>
+            </button>
+            <div className="dpad-center"></div>
+            <button className="dpad-btn dpad-right" onClick={handleDown}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 12l-8 8V4z"/>
+              </svg>
+            </button>
+            <button className="dpad-btn dpad-down" onClick={handleDown}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 20l8-8H4z"/>
+              </svg>
+            </button>
           </div>
-          <button className="ctrl-btn" onClick={wrappedHandleAction} disabled={isWorking}>
-            OK
-          </button>
+
+          {/* Action buttons */}
+          <div className="action-btns">
+            <button className="action-btn btn-b" onClick={() => setModeAndReset('pet')}>
+              B
+            </button>
+            <button className="action-btn btn-a" onClick={handleSelect}>
+              A
+            </button>
+          </div>
         </div>
       </div>
     </div>
