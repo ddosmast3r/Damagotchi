@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tamagotchi Game Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #306230;
+            font-family: monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .device {
+            background: #8b8b8b;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.5),
+                inset 0 2px 0 rgba(255,255,255,0.2);
+        }
+
+        .device-inner {
+            background: #6b6b6b;
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        /* Game Boy style screen */
+        .screen {
+            background: #9bbc0f;
+            border: 8px solid #0f380f;
+            border-radius: 5px;
+            width: 320px;
+            height: 288px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        /* Room background */
+        .room {
+            width: 100%;
+            height: 100%;
+            background: #9bbc0f;
+            position: relative;
+        }
+
+        /* Floor */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #306230;
+            border-top: 4px solid #0f380f;
+        }
+
+        /* Computer desk */
+        .desk {
+            position: absolute;
+            right: 20px;
+            bottom: 40px;
+            width: 100px;
+            height: 60px;
+            background: #306230;
+            border: 3px solid #0f380f;
+        }
+
+        .desk::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: 10px;
+            width: 80px;
+            height: 35px;
+            background: #8bac0f;
+            border: 3px solid #0f380f;
+        }
+
+        /* Monitor glow effect */
+        .monitor-glow {
+            position: absolute;
+            right: 35px;
+            bottom: 105px;
+            width: 60px;
+            height: 25px;
+            background: #9bbc0f;
+            opacity: 0.5;
+            animation: glow 0.5s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { opacity: 0.3; }
+            to { opacity: 0.6; }
+        }
+
+        /* Character canvas */
+        #characterCanvas {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Stats panel */
+        .stats-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-icon {
+            width: 16px;
+            height: 16px;
+            background: #0f380f;
+        }
+
+        .stat-bar {
+            width: 40px;
+            height: 8px;
+            background: #306230;
+            border: 2px solid #0f380f;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: #0f380f;
+            transition: width 0.3s;
+        }
+
+        /* Action text */
+        .action-text {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0f380f;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 60px;
+            height: 60px;
+            background: #444;
+            border: none;
+            border-radius: 50%;
+            color: #999;
+            font-size: 10px;
+            font-family: monospace;
+            cursor: pointer;
+            box-shadow:
+                0 4px 0 #222,
+                0 6px 10px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 2px 0 #222,
+                0 3px 5px rgba(0,0,0,0.3);
+        }
+
+        .btn:hover {
+            background: #555;
+        }
+
+        /* Animation selector */
+        .anim-selector {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .anim-selector select {
+            padding: 10px 20px;
+            font-family: monospace;
+            font-size: 14px;
+            background: #9bbc0f;
+            border: 3px solid #0f380f;
+            color: #0f380f;
+            cursor: pointer;
+        }
+
+        /* Label */
+        .label {
+            background: #444;
+            color: #888;
+            text-align: center;
+            padding: 5px;
+            font-size: 10px;
+            margin-top: 10px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="device">
+        <div class="device-inner">
+            <div class="screen">
+                <div class="room">
+                    <div class="stats-panel">
+                        <div class="stat">
+                            <div class="stat-icon"></div>
+                            <div class="stat-bar"><div class="stat-fill" id="moodBar" style="width: 80%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-icon"></div>
+                            <div class="stat-bar"><div class="stat-fill" id="energyBar" style="width: 60%"></div></div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-icon"></div>
+                            <div class="stat-bar"><div class="stat-fill" id="mentalBar" style="width: 45%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="floor"></div>
+                    <div class="desk"></div>
+                    <div class="monitor-glow"></div>
+
+                    <canvas id="characterCanvas" width="128" height="128"></canvas>
+
+                    <div class="action-text" id="actionText">Playing CS...</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="loadAnimation('idle')">IDLE</button>
+                <button class="btn" onclick="loadAnimation('animation_cs')">PLAY CS</button>
+                <button class="btn" onclick="loadAnimation('sleep')">SLEEP</button>
+            </div>
+
+            <div class="anim-selector">
+                <select id="animSelect" onchange="loadAnimation(this.value)">
+                    <option value="">-- Select Animation --</option>
+                </select>
+            </div>
+
+            <div class="label">TAMAGOTCHI DEV PREVIEW</div>
+        </div>
+    </div>
+
+    <script>
+        // Game Boy palette
+        const PALETTE = ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'];
+
+        // Animation state
+        let currentAnimation = null;
+        let currentFrame = 0;
+        let animTimer = null;
+        let canvas, ctx;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            canvas = document.getElementById('characterCanvas');
+            ctx = canvas.getContext('2d');
+
+            // Load available animations
+            await loadAnimationList();
+
+            // Load default animation
+            await loadAnimation('animation_cs');
+        });
+
+        // Load list of available animations
+        async function loadAnimationList() {
+            const select = document.getElementById('animSelect');
+
+            // Try to load animations from the animations folder
+            const knownAnims = ['animation_cs', 'idle', 'walk', 'sleep', 'drink', 'vape'];
+
+            for (const name of knownAnims) {
+                try {
+                    const response = await fetch(`../image/animations/${name}.json`);
+                    if (response.ok) {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        select.appendChild(option);
+                    }
+                } catch (e) {
+                    // Animation not found, skip
+                }
+            }
+        }
+
+        // Load and play animation
+        async function loadAnimation(name) {
+            if (!name) return;
+
+            try {
+                const response = await fetch(`../image/animations/${name}.json`);
+                if (!response.ok) {
+                    console.error(`Animation ${name} not found`);
+                    return;
+                }
+
+                currentAnimation = await response.json();
+                currentFrame = 0;
+
+                // Update action text
+                const actionTexts = {
+                    'animation_cs': 'Playing CS...',
+                    'idle': 'Chilling...',
+                    'sleep': 'Zzz...',
+                    'drink': 'Drinking energy...',
+                    'vape': 'Vaping...',
+                    'walk': 'Walking...'
+                };
+                document.getElementById('actionText').textContent = actionTexts[name] || name;
+
+                // Start animation loop
+                if (animTimer) clearInterval(animTimer);
+                animTimer = setInterval(updateAnimation, currentAnimation.speed || 200);
+
+                // Render first frame
+                renderFrame();
+
+                console.log(`Loaded animation: ${name} (${currentAnimation.frameCount} frames)`);
+            } catch (e) {
+                console.error('Error loading animation:', e);
+            }
+        }
+
+        // Update animation frame
+        function updateAnimation() {
+            if (!currentAnimation) return;
+
+            currentFrame = (currentFrame + 1) % currentAnimation.frames.length;
+            renderFrame();
+        }
+
+        // Render current frame
+        function renderFrame() {
+            if (!currentAnimation) return;
+
+            const frame = currentAnimation.frames[currentFrame];
+            const size = currentAnimation.spriteSize;
+            const scale = canvas.width / size;
+
+            // Clear canvas
+            ctx.fillStyle = PALETTE[3];
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw pixels
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const colorIndex = frame[y][x];
+                    if (colorIndex !== 3) { // Skip background color
+                        ctx.fillStyle = PALETTE[colorIndex];
+                        ctx.fillRect(x * scale, y * scale, scale, scale);
+                    }
+                }
+            }
+        }
+
+        // Simulate stat changes when playing CS
+        let statInterval = setInterval(() => {
+            // Energy decreases
+            const energyBar = document.getElementById('energyBar');
+            let energy = parseInt(energyBar.style.width) || 60;
+            energy = Math.max(10, energy - 1);
+            energyBar.style.width = energy + '%';
+
+            // Mental health decreases (from gaming addiction)
+            const mentalBar = document.getElementById('mentalBar');
+            let mental = parseInt(mentalBar.style.width) || 45;
+            mental = Math.max(5, mental - 0.5);
+            mentalBar.style.width = mental + '%';
+
+            // Mood fluctuates (gaming emotions)
+            const moodBar = document.getElementById('moodBar');
+            let mood = parseInt(moodBar.style.width) || 80;
+            mood = Math.max(20, Math.min(100, mood + (Math.random() > 0.5 ? 2 : -3)));
+            moodBar.style.width = mood + '%';
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamagotchi Dev Environment</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Game Screen -->
+        <div class="game-screen">
+            <div class="room-background" id="room">
+                <!-- Character will be rendered here -->
+                <div class="character" id="character"></div>
+
+                <!-- Objects in room -->
+                <div class="room-object computer" id="computer"></div>
+                <div class="room-object bed" id="bed"></div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat">
+                    <span class="stat-icon">😊</span>
+                    <div class="stat-bar"><div class="stat-fill mood" style="width: 80%"></div></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">⚡</span>
+                    <div class="stat-bar"><div class="stat-fill energy" style="width: 60%"></div></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">🧠</span>
+                    <div class="stat-bar"><div class="stat-fill mental" style="width: 70%"></div></div>
+                </div>
+                <div class="stat">
+                    <span class="stat-icon">💰</span>
+                    <span class="coins-value" id="coins">150</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dev Controls -->
+        <div class="dev-panel">
+            <h3>Animation Controls</h3>
+
+            <div class="animation-buttons">
+                <button onclick="game.playAnimation('idle')" class="anim-btn">Idle</button>
+                <button onclick="game.playAnimation('walk')" class="anim-btn">Walk</button>
+                <button onclick="game.playAnimation('drink')" class="anim-btn">Drink Energy</button>
+                <button onclick="game.playAnimation('vape')" class="anim-btn">Vape</button>
+                <button onclick="game.playAnimation('computer')" class="anim-btn">Computer</button>
+                <button onclick="game.playAnimation('sleep')" class="anim-btn">Sleep</button>
+                <button onclick="game.playAnimation('sad')" class="anim-btn">Sad</button>
+                <button onclick="game.playAnimation('happy')" class="anim-btn">Happy</button>
+            </div>
+
+            <h3>State Controls</h3>
+            <div class="state-controls">
+                <label>Mood: <input type="range" id="moodSlider" min="0" max="100" value="80" onchange="game.updateStat('mood', this.value)"></label>
+                <label>Energy: <input type="range" id="energySlider" min="0" max="100" value="60" onchange="game.updateStat('energy', this.value)"></label>
+                <label>Mental: <input type="range" id="mentalSlider" min="0" max="100" value="70" onchange="game.updateStat('mental', this.value)"></label>
+            </div>
+
+            <h3>Current Animation</h3>
+            <div class="current-state" id="currentState">idle</div>
+
+            <h3>Frame Info</h3>
+            <div class="frame-info" id="frameInfo">Frame: 0 / 4</div>
+        </div>
+    </div>
+
+    <script src="src/sprites.js"></script>
+    <script src="src/animations.js"></script>
+    <script src="src/game.js"></script>
+</body>
+</html>

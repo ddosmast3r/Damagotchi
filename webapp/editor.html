@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tamagotchi Sprite Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        /* Game Boy green background */
+        background: #9bbc0f;
+        font-family: "Press Start 2P", monospace;
+        padding: 16px;
+        color: #0f380f;
+        box-sizing: border-box;
+        height: 100%;
+      }
+
+      .editor-container {
+        height: 100%;
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: stretch;
+        gap: 16px;
+      }
+
+      /* Panel styling - Game Boy style */
+      .panel {
+        background: #8bac0f;
+        border: 4px solid #0f380f;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .panel h3 {
+        color: #0f380f;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #306230;
+      }
+
+      /* Tools Panel */
+      .tools-panel {
+        width: 100px;
+        min-width: 100px;
+      }
+
+      .tools-panel h3 {
+        font-size: 7px;
+        letter-spacing: 0px;
+        text-align: center;
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+      }
+
+      .tools-panel h3:not(:first-child) {
+        margin-top: 12px;
+      }
+
+      /* Side Column (Message + Assets) */
+      .side-column {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 140px;
+        min-width: 140px;
+      }
+
+      /* Message Panel */
+      .message-panel {
+        flex: 1;
+      }
+
+      /* Assets Panel */
+      .assets-panel {
+        flex: 1;
+      }
+
+      .message-panel h3 {
+        margin-bottom: 10px;
+      }
+
+      .message-input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 7px;
+        color: #0f380f;
+        resize: none;
+        min-height: 60px;
+      }
+
+      .message-input::placeholder {
+        color: #306230;
+      }
+
+      .size-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .size-row input {
+        width: 50px;
+        padding: 4px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 7px;
+        color: #0f380f;
+        text-align: center;
+      }
+
+      .size-row .position-label {
+        margin-bottom: 0;
+      }
+
+      .position-label {
+        font-size: 7px;
+        margin-bottom: 6px;
+        display: block;
+      }
+
+      .position-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+
+      .position-grid button {
+        padding: 8px 4px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 5px;
+        color: #0f380f;
+        cursor: pointer;
+      }
+
+      .position-grid button:hover {
+        background: #8bac0f;
+      }
+
+      .position-grid button.active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      .coord-inputs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+
+      .tail-btns {
+        display: flex;
+        gap: 4px;
+      }
+
+      .tail-btns button {
+        flex: 1;
+        padding: 6px 2px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-size: 10px;
+        color: #0f380f;
+        cursor: pointer;
+      }
+
+      .tail-btns button:hover {
+        background: #8bac0f;
+      }
+
+      .tail-btns button.active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      /* Assets */
+      .assets-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-content: start;
+        gap: 4px;
+        flex: 1;
+        min-height: 50px;
+        overflow-y: auto;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        padding: 4px;
+        margin-bottom: 6px;
+      }
+
+      .asset-thumb {
+        width: 36px;
+        height: 36px;
+        background: #9bbc0f;
+        border: 2px solid #306230;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .asset-thumb:hover {
+        border-color: #0f380f;
+      }
+
+      .asset-thumb canvas {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+
+      .asset-thumb .delete-asset {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 12px;
+        height: 12px;
+        background: #0f380f;
+        color: #9bbc0f;
+        border: none;
+        font-size: 8px;
+        cursor: pointer;
+        display: none;
+        line-height: 10px;
+        text-align: center;
+      }
+
+      .asset-thumb:hover .delete-asset {
+        display: block;
+      }
+
+      .assets-actions {
+        display: flex;
+        gap: 4px;
+      }
+
+      .assets-actions button {
+        flex: 1;
+        padding: 6px 4px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        cursor: pointer;
+        font-size: 7px;
+        font-family: "Press Start 2P", monospace;
+        color: #0f380f;
+      }
+
+      .assets-actions button:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      .coord-field {
+        flex: 1;
+      }
+
+      .coord-field label {
+        font-size: 6px;
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .coord-field input {
+        width: 100%;
+        padding: 5px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 7px;
+        color: #0f380f;
+        text-align: center;
+      }
+
+      .tool-btn {
+        width: 100%;
+        height: 56px;
+        background: #9bbc0f;
+        border: 3px solid #0f380f;
+        margin-bottom: 6px;
+        cursor: pointer;
+        font-size: 7px;
+        font-family: "Press Start 2P", monospace;
+        color: #0f380f;
+        transition: all 0.1s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+
+      .tool-icon {
+        width: 18px;
+        height: 18px;
+        fill: #0f380f;
+      }
+
+      .tool-btn.active .tool-icon {
+        fill: #9bbc0f;
+      }
+
+      .tool-btn:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      .tool-btn.active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      /* Transform */
+      .transform-arrows {
+        display: grid;
+        grid-template-columns: repeat(2, 28px);
+        gap: 2px;
+        margin-bottom: 6px;
+        justify-content: center;
+      }
+
+      .arrow-btn {
+        width: 28px;
+        height: 28px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f380f;
+      }
+
+      .arrow-btn:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      .arrow-btn:active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      .transform-btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+      }
+
+      .transform-btn {
+        padding: 6px 2px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 5px;
+        color: #0f380f;
+        cursor: pointer;
+      }
+
+      .transform-btn:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      .transform-btn:active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      .transform-btn.wide {
+        grid-column: span 2;
+      }
+
+      /* Palette */
+      .palette {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+      }
+
+      .color-btn {
+        width: 100%;
+        height: 24px;
+        border: 2px solid #0f380f;
+        cursor: pointer;
+      }
+
+      .color-btn.active {
+        border-width: 3px;
+        box-shadow: 0 0 0 1px #9bbc0f;
+      }
+
+      /* Layers */
+      .layers-container {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .layer-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 6px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        cursor: pointer;
+        font-size: 7px;
+        font-family: "Press Start 2P", monospace;
+        color: #0f380f;
+      }
+
+      .layer-btn.active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      .color-btn.c0 {
+        background: #0f380f;
+      }
+      .color-btn.c1 {
+        background: #306230;
+      }
+      .color-btn.c2 {
+        background: #8bac0f;
+      }
+      .color-btn.c3 {
+        background: #9bbc0f;
+      }
+
+      /* Main Canvas Area */
+      .canvas-panel {
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+      }
+
+      .main-title {
+        font-family: "Press Start 2P", monospace;
+        font-size: 16px;
+        color: #0f380f;
+        text-align: center;
+        margin-bottom: 8px;
+        text-shadow: 2px 2px 0px #306230;
+        letter-spacing: 2px;
+      }
+
+      .canvas-wrapper {
+        background: #9bbc0f;
+        border: 4px solid #0f380f;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-height: 0;
+        aspect-ratio: 1;
+        max-height: calc(100% - 80px);
+      }
+
+      #drawCanvas {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        cursor: crosshair;
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+
+      .canvas-info {
+        margin-top: 8px;
+        font-size: 7px;
+        color: #306230;
+      }
+
+      /* Preview & Frames Panel */
+      .preview-panel {
+        width: 280px;
+        min-width: 280px;
+      }
+
+      /* Animation Preview */
+      .preview-box {
+        background: #9bbc0f;
+        border: 4px solid #0f380f;
+        width: 200px;
+        height: 200px;
+        min-width: 200px;
+        min-height: 200px;
+        flex-shrink: 0;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #previewCanvas {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      /* Speech Bubble in Preview */
+      .preview-bubble {
+        position: absolute;
+        background: #0f380f;
+        color: #9bbc0f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 6px;
+        padding: 4px 6px;
+        max-width: 120px;
+        text-align: center;
+        word-wrap: break-word;
+        white-space: nowrap;
+        display: none;
+        z-index: 10;
+      }
+
+      .preview-bubble.active {
+        display: block;
+      }
+
+      .preview-bubble::after {
+        content: '';
+        position: absolute;
+        border: 4px solid transparent;
+      }
+
+      /* Bubble tail */
+      .preview-bubble::after {
+        content: '';
+        position: absolute;
+        border: 5px solid transparent;
+        display: none;
+      }
+
+      .preview-bubble.tail-up::after {
+        display: block;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-bottom-color: #0f380f;
+      }
+
+      .preview-bubble.tail-down::after {
+        display: block;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-top-color: #0f380f;
+      }
+
+      .preview-bubble.tail-left::after {
+        display: block;
+        left: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-right-color: #0f380f;
+      }
+
+      .preview-bubble.tail-right::after {
+        display: block;
+        right: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-left-color: #0f380f;
+      }
+
+
+      .preview-controls {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 12px;
+      }
+
+      .preview-controls button {
+        padding: 10px 16px;
+        background: #9bbc0f;
+        border: 3px solid #0f380f;
+        cursor: pointer;
+        font-family: "Press Start 2P", monospace;
+        font-size: 7px;
+        color: #0f380f;
+      }
+
+      .preview-controls button:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      .preview-controls button.active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      /* Speed control */
+      .speed-control {
+        margin-bottom: 12px;
+        text-align: center;
+      }
+
+      .speed-control label {
+        font-size: 7px;
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .speed-control input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 16px;
+        background: #9bbc0f;
+        border: 3px solid #0f380f;
+        cursor: pointer;
+      }
+
+      .speed-control input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 12px;
+        height: 20px;
+        background: #0f380f;
+        border: none;
+        cursor: pointer;
+        margin-top: -5px;
+      }
+
+      .speed-control input[type="range"]::-moz-range-thumb {
+        width: 12px;
+        height: 20px;
+        background: #0f380f;
+        border: none;
+        border-radius: 0;
+        cursor: pointer;
+      }
+
+      /* Frames Timeline */
+      .frames-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .frames-container {
+        display: grid;
+        grid-template-columns: repeat(3, 56px);
+        grid-template-rows: repeat(2, 56px);
+        gap: 8px;
+        min-height: 120px;
+      }
+
+      .frame-thumb {
+        width: 56px;
+        height: 56px;
+        background: #9bbc0f;
+        border: 3px solid #0f380f;
+        cursor: pointer;
+        position: relative;
+        image-rendering: pixelated;
+      }
+
+      .frame-thumb:hover {
+        border-color: #306230;
+      }
+
+      .frame-thumb.active {
+        border-width: 4px;
+        border-color: #0f380f;
+        box-shadow: 0 0 0 2px #306230;
+      }
+
+      .frame-thumb canvas {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+
+      .frame-number {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        background: #0f380f;
+        color: #9bbc0f;
+        font-size: 6px;
+        padding: 2px 3px;
+      }
+
+      /* Pagination */
+      .pagination {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .pagination button {
+        width: 28px;
+        height: 28px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        cursor: pointer;
+        font-family: "Press Start 2P", monospace;
+        font-size: 10px;
+        color: #0f380f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .pagination button:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      .pagination button:disabled {
+        cursor: not-allowed;
+      }
+
+      .pagination span {
+        font-size: 7px;
+        min-width: 35px;
+        text-align: center;
+      }
+
+      .frame-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .frame-actions button {
+        flex: 1;
+        padding: 10px 4px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        cursor: pointer;
+        font-size: 7px;
+        font-family: "Press Start 2P", monospace;
+        color: #0f380f;
+      }
+
+      .frame-actions button:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      .frame-actions button.active {
+        background: #0f380f;
+        color: #9bbc0f;
+      }
+
+      /* Export/Import */
+      .export-section {
+        margin-top: auto;
+        padding-top: 15px;
+      }
+
+      .export-section button {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: #306230;
+        border: 3px solid #0f380f;
+        color: #9bbc0f;
+        cursor: pointer;
+        font-family: "Press Start 2P", monospace;
+        font-size: 8px;
+      }
+
+      .export-section button:hover {
+        background: #0f380f;
+      }
+
+      .export-row {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .export-row button {
+        flex: 1;
+        padding: 10px;
+        background: #9bbc0f;
+        border: 3px solid #0f380f;
+        color: #0f380f;
+        cursor: pointer;
+        font-family: "Press Start 2P", monospace;
+        font-size: 7px;
+      }
+
+      .export-row button:hover {
+        background: #306230;
+        color: #9bbc0f;
+      }
+
+      /* Sprite size selector */
+      .size-selector {
+        margin-bottom: 12px;
+      }
+
+      .size-selector select {
+        width: auto;
+        min-width: 100px;
+        padding: 8px 12px;
+        background: #9bbc0f;
+        border: 3px solid #0f380f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 10px;
+        color: #0f380f;
+        cursor: pointer;
+      }
+
+      .size-selector select option {
+        font-size: 12px;
+        padding: 8px;
+      }
+
+      /* Animation name input */
+      .anim-name {
+        margin-bottom: 12px;
+      }
+
+      .anim-name input {
+        width: 100%;
+        padding: 10px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        font-family: "Press Start 2P", monospace;
+        font-size: 8px;
+        color: #0f380f;
+      }
+
+      .anim-name input::placeholder {
+        color: #306230;
+      }
+
+      /* Custom pixel checkbox */
+      .pixel-checkbox {
+        margin-top: 10px;
+      }
+
+      .pixel-checkbox label {
+        font-size: 7px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .pixel-checkbox input[type="checkbox"] {
+        display: none;
+      }
+
+      .pixel-checkbox .checkbox-box {
+        width: 14px;
+        height: 14px;
+        background: #9bbc0f;
+        border: 2px solid #0f380f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .pixel-checkbox .checkbox-box::after {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: transparent;
+      }
+
+      .pixel-checkbox input[type="checkbox"]:checked + .checkbox-box::after {
+        background: #0f380f;
+      }
+
+      .pixel-checkbox input[type="checkbox"]:checked + .checkbox-box {
+        background: #8bac0f;
+      }
+
+      .deco {
+        margin-top: auto;
+        padding-top: 15px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        image-rendering: pixelated;
+        width: 48px;
+        height: auto;
+      }
+
+      .credits {
+        position: fixed;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "Press Start 2P", monospace;
+        font-size: 6px;
+        color: #306230;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="editor-container">
+      <!-- Tools Panel -->
+      <div class="panel tools-panel">
+        <h3>Tools</h3>
+
+        <button class="tool-btn active" data-tool="pencil" title="Pencil (P)">
+          <svg class="tool-icon" viewBox="0 0 8 8">
+            <!-- Карандаш -->
+            <rect x="6" y="0" width="2" height="2" />
+            <rect x="5" y="1" width="2" height="2" />
+            <rect x="4" y="2" width="2" height="2" />
+            <rect x="3" y="3" width="2" height="2" />
+            <rect x="2" y="4" width="2" height="2" />
+            <rect x="1" y="5" width="2" height="2" />
+            <rect x="0" y="7" width="1" height="1" />
+          </svg>
+          PEN
+        </button>
+        <button class="tool-btn" data-tool="eraser" title="Eraser (E)">
+          <svg class="tool-icon" viewBox="0 0 8 8">
+            <!-- Ластик -->
+            <rect x="1" y="1" width="6" height="6" />
+            <rect x="2" y="2" width="4" height="4" fill="#9bbc0f" />
+          </svg>
+          ERA
+        </button>
+        <button class="tool-btn" data-tool="fill" title="Fill (F)">
+          <svg class="tool-icon" viewBox="0 0 8 8">
+            <!-- Ведро -->
+            <rect x="1" y="0" width="2" height="1" />
+            <rect x="0" y="1" width="1" height="2" />
+            <rect x="3" y="1" width="1" height="1" />
+            <rect x="1" y="3" width="6" height="1" />
+            <rect x="2" y="4" width="5" height="3" />
+            <rect x="3" y="7" width="3" height="1" />
+          </svg>
+          FILL
+        </button>
+        <button class="tool-btn" data-tool="line" title="Line (L)">
+          <svg class="tool-icon" viewBox="0 0 8 8">
+            <!-- Линия с точками на концах -->
+            <rect x="0" y="0" width="2" height="2" />
+            <rect x="2" y="2" width="1" height="1" />
+            <rect x="3" y="3" width="2" height="2" />
+            <rect x="5" y="5" width="1" height="1" />
+            <rect x="6" y="6" width="2" height="2" />
+          </svg>
+          LINE
+        </button>
+        <button class="tool-btn" data-tool="rect" title="Rectangle (R)">
+          <svg class="tool-icon" viewBox="0 0 8 8">
+            <!-- Прямоугольник -->
+            <rect x="0" y="0" width="8" height="1" />
+            <rect x="0" y="7" width="8" height="1" />
+            <rect x="0" y="1" width="1" height="6" />
+            <rect x="7" y="1" width="1" height="6" />
+          </svg>
+          RECT
+        </button>
+        <h3>Transform</h3>
+
+        <div class="transform-arrows">
+          <button class="arrow-btn" id="shiftUp" title="Shift Up">↑</button>
+          <button class="arrow-btn" id="shiftRight" title="Shift Right">→</button>
+          <button class="arrow-btn" id="shiftDown" title="Shift Down">↓</button>
+          <button class="arrow-btn" id="shiftLeft" title="Shift Left">←</button>
+        </div>
+
+        <div class="transform-btns">
+          <button class="transform-btn" id="flipH" title="Flip Horizontal">FL H</button>
+          <button class="transform-btn" id="flipV" title="Flip Vertical">FL V</button>
+          <button class="transform-btn wide" id="rotate" title="Rotate 90° CW">ROT 90</button>
+        </div>
+
+        <h3>Color</h3>
+        <div class="palette">
+          <button class="color-btn c0 active" data-color="0" title="Darkest"></button>
+          <button class="color-btn c1" data-color="1" title="Dark"></button>
+          <button class="color-btn c2" data-color="2" title="Light"></button>
+          <button class="color-btn c3" data-color="3" title="Lightest (BG)"></button>
+        </div>
+
+        <h3>Layers</h3>
+        <div class="layers-container">
+          <button class="layer-btn" data-layer="2">Layer 3</button>
+          <button class="layer-btn" data-layer="1">Layer 2</button>
+          <button class="layer-btn active" data-layer="0">Layer 1</button>
+        </div>
+
+        <img src="assets/deco_1.png" class="deco" alt="">
+      </div>
+
+      <!-- Main Canvas -->
+      <div class="panel canvas-panel">
+        <div class="main-title">ZUMIGUTCHI EDITOR</div>
+        <h3>Draw Sprite</h3>
+
+        <div class="size-selector">
+          <select id="spriteSize">
+            <option value="16">16x16</option>
+            <option value="24">24x24</option>
+            <option value="32" selected>32x32</option>
+          </select>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="drawCanvas" width="512" height="512"></canvas>
+        </div>
+
+        <div class="canvas-info">
+          <span id="cursorPos">X: 0 Y: 0</span> |
+          <span id="canvasSize">32x32</span>
+        </div>
+
+        <div class="pixel-checkbox">
+          <label>
+            <input type="checkbox" id="showGrid" checked /><span
+              class="checkbox-box"
+            ></span
+            >GRID
+          </label>
+        </div>
+      </div>
+
+      <!-- Message & Assets Column -->
+      <div class="side-column">
+        <!-- Message Panel -->
+        <div class="panel message-panel">
+          <h3>Message</h3>
+
+          <div class="pixel-checkbox" style="margin-bottom: 10px;">
+            <label>
+              <input type="checkbox" id="bubbleEnabled" /><span
+                class="checkbox-box"
+              ></span
+              >SHOW
+            </label>
+          </div>
+
+          <textarea class="message-input" id="bubbleText" placeholder="Enter message..." maxlength="50"></textarea>
+
+          <div class="size-row">
+            <span class="position-label">Size:</span>
+            <input type="number" id="bubbleFontSize" value="6" min="4" max="16" />
+          </div>
+
+          <span class="position-label">Position:</span>
+          <div class="position-grid">
+            <button data-pos="top-left" data-x="5" data-y="5">↖</button>
+            <button data-pos="top" data-x="50" data-y="5" class="active">↑</button>
+            <button data-pos="top-right" data-x="95" data-y="5">↗</button>
+            <button data-pos="left" data-x="5" data-y="50">←</button>
+            <button data-pos="center" data-x="50" data-y="50">•</button>
+            <button data-pos="right" data-x="95" data-y="50">→</button>
+            <button data-pos="bottom-left" data-x="5" data-y="95">↙</button>
+            <button data-pos="bottom" data-x="50" data-y="95">↓</button>
+            <button data-pos="bottom-right" data-x="95" data-y="95">↘</button>
+          </div>
+
+          <div class="coord-inputs">
+            <div class="coord-field">
+              <label>X %</label>
+              <input type="number" id="bubbleX" value="50" min="0" max="100" />
+            </div>
+            <div class="coord-field">
+              <label>Y %</label>
+              <input type="number" id="bubbleY" value="5" min="0" max="100" />
+            </div>
+          </div>
+
+          <span class="position-label">Tail:</span>
+          <div class="tail-btns">
+            <button data-tail="up">↑</button>
+            <button data-tail="down" class="active">↓</button>
+            <button data-tail="left">←</button>
+            <button data-tail="right">→</button>
+            <button data-tail="none">✕</button>
+          </div>
+        </div>
+
+        <!-- Assets Panel -->
+        <div class="panel assets-panel">
+          <h3>Assets</h3>
+          <div class="assets-container" id="assetsContainer">
+            <!-- Assets will be added here -->
+          </div>
+          <div class="assets-actions">
+            <button id="saveAsset">SAVE</button>
+            <button id="clearAssets">CLR</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview & Frames -->
+      <div class="panel preview-panel">
+        <h3>Preview</h3>
+
+        <div class="preview-box">
+          <canvas id="previewCanvas" width="128" height="128"></canvas>
+          <div class="preview-bubble pos-top" id="previewBubble">Hello!</div>
+        </div>
+
+        <div class="preview-controls">
+          <button id="playBtn" class="active">PLAY</button>
+          <button id="stopBtn">STOP</button>
+        </div>
+
+        <div class="speed-control">
+          <label>Speed: <span id="speedValue">200</span>ms</label>
+          <input
+            type="range"
+            id="speedSlider"
+            min="50"
+            max="500"
+            value="200"
+            step="50"
+          />
+        </div>
+
+        <h3>Frames</h3>
+
+        <div class="frames-row">
+          <div class="frames-container" id="framesContainer">
+            <!-- Frame thumbnails will be added here -->
+          </div>
+
+          <div class="pagination">
+            <button id="prevPage"><</button>
+            <span id="pageInfo">1/1</span>
+            <button id="nextPage">></button>
+          </div>
+        </div>
+
+        <div class="frame-actions">
+          <button id="addFrame">ADD</button>
+          <button id="dupFrame">DUP</button>
+          <button id="delFrame">DEL</button>
+        </div>
+
+        <div class="frame-actions">
+          <button id="onionSkin">ONION</button>
+        </div>
+
+        <div class="export-section">
+          <h3>Export</h3>
+
+          <div class="anim-name">
+            <input type="text" id="animName" placeholder="animation_name" />
+          </div>
+
+          <button id="exportPng">SAVE PNG</button>
+          <button id="exportJson">SAVE JSON</button>
+          <button id="importJson">LOAD JSON</button>
+
+          <div class="export-row">
+            <button id="clearCanvas">CLEAR</button>
+            <button id="newSprite">NEW</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="credits">CREATED BY ODISSEY POGOSOV</div>
+
+    <script src="src/editor.js"></script>
+  </body>
+</html>

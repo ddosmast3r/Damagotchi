@@ -1,0 +1,55 @@
+.logo-animated {
+  width: 220px;
+  height: auto;
+  overflow: visible;
+}
+
+/* Цветные блоки - появление слева направо */
+.logo-block {
+  opacity: 0;
+  animation: block-appear 0.4s ease-out forwards;
+}
+
+/* Порядок по позиции слева направо:
+   block-1 = 0s (самый левый)
+   block-2 = 0.15s
+   block-3 = 0.3s
+   block-4 = 0.45s (самый правый)
+*/
+.block-1 { animation-delay: 0s; }
+.block-2 { animation-delay: 0.15s; }
+.block-3 { animation-delay: 0.3s; }
+.block-4 { animation-delay: 0.45s; }
+
+@keyframes block-appear {
+  0% {
+    opacity: 0;
+    filter: brightness(2);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+/* Текст - появляется после всех блоков */
+.logo-text {
+  opacity: 0;
+  animation: text-appear 0.5s ease-out forwards;
+  animation-delay: 0.7s;
+}
+
+@keyframes text-appear {
+  0% {
+    opacity: 0;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  }
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
+  }
+}

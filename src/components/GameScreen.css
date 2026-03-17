@@ -1,0 +1,536 @@
+/* Game Screen Container */
+.game-screen-container {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Device body */
+.game-device {
+  background: linear-gradient(165deg, #d4d4c4 0%, #b8b8a4 30%, #a0a090 70%, #888878 100%);
+  border-radius: 24px;
+  padding: 16px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.15);
+  border: 3px solid #7a7a6a;
+}
+
+/* LCD Display */
+.game-display {
+  width: 280px;
+  height: 280px;
+  background: #9bbc0f;
+  border-radius: 8px;
+  border: 4px solid #3a3a38;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* LCD scanlines */
+.game-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.02) 0px,
+    rgba(0, 0, 0, 0.02) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Screen header */
+.screen-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 2px solid #306230;
+}
+
+.header-mode {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  color: #0f380f;
+  letter-spacing: 1px;
+}
+
+.header-coins {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  color: #0f380f;
+}
+
+/* Screen content */
+.screen-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+/* Pet view */
+.pet-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.sprite {
+  position: relative;
+  image-rendering: pixelated;
+}
+
+.sprite.eat { animation: bounce 0.3s ease; }
+.sprite.play { animation: spin 0.3s ease; }
+.sprite.heal { animation: glow 0.3s ease; }
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+
+.pixel {
+  position: absolute;
+  background: #0f380f;
+}
+
+.effect {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: #0f380f;
+  animation: float-up 0.5s ease-out;
+}
+
+@keyframes float-up {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Item list */
+.item-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #8bac0f;
+  border: 2px solid #306230;
+  border-radius: 4px;
+  transition: all 0.1s ease;
+}
+
+.list-item.selected {
+  background: #306230;
+  border-color: #0f380f;
+}
+
+.list-item.selected .item-name,
+.list-item.selected .item-price,
+.list-item.selected .item-count {
+  color: #9bbc0f;
+}
+
+.list-item.disabled {
+  opacity: 0.5;
+}
+
+.item-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.item-name {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  color: #0f380f;
+  text-transform: uppercase;
+}
+
+.item-price,
+.item-count {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  color: #0f380f;
+}
+
+/* Empty state */
+.empty-list {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: #306230;
+  text-transform: uppercase;
+}
+
+/* Work progress */
+.work-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.work-icon {
+  font-size: 48px;
+  animation: work-bounce 0.5s ease infinite;
+}
+
+@keyframes work-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.work-bar {
+  width: 80%;
+  height: 16px;
+  background: #306230;
+  border: 2px solid #0f380f;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.work-fill {
+  height: 100%;
+  background: #0f380f;
+  transition: width 0.3s linear;
+}
+
+.work-percent {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  color: #0f380f;
+}
+
+/* Message overlay */
+.screen-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0f380f;
+  color: #9bbc0f;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 20;
+  animation: message-pop 0.2s ease;
+}
+
+@keyframes message-pop {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Controls */
+.game-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px 8px;
+  gap: 12px;
+}
+
+.ctrl-btn {
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #6a6a5a 0%, #5a5a4a 100%);
+  border: 2px solid #4a4a3a;
+  border-radius: 6px;
+  color: #d1d1d1;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow:
+    0 3px 0 #3a3a2a,
+    0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
+}
+
+.ctrl-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 #3a3a2a,
+    0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ctrl-arrows {
+  display: flex;
+  gap: 6px;
+}
+
+.ctrl-btn.small {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+/* ============ MINI GAMES ============ */
+
+.item-desc-small {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  color: #306230;
+}
+
+.list-item.selected .item-desc-small {
+  color: #8bac0f;
+}
+
+.minigame-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 8px;
+}
+
+.game-info {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  color: #306230;
+}
+
+.game-hint {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  color: #0f380f;
+  text-align: center;
+}
+
+/* Result screen */
+.game-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-title {
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+  font-weight: bold;
+  color: #0f380f;
+}
+
+.result-score {
+  font-family: 'Courier New', monospace;
+  font-size: 28px;
+  font-weight: bold;
+  color: #306230;
+}
+
+.result-hint {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #306230;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* REACTION GAME */
+.reaction-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #306230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  font-size: 24px;
+  font-weight: bold;
+  color: #8bac0f;
+  transition: all 0.1s ease;
+}
+
+.reaction-circle.show {
+  background: #0f380f;
+  color: #9bbc0f;
+  transform: scale(1.1);
+  animation: pulse 0.2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1.1); }
+  50% { transform: scale(1.15); }
+}
+
+/* LEFT/RIGHT GAME */
+.hands-container {
+  display: flex;
+  gap: 40px;
+}
+
+.hand {
+  font-size: 48px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #8bac0f;
+  border: 3px solid #306230;
+  transition: all 0.2s ease;
+}
+
+.hand.correct {
+  background: #306230;
+  border-color: #0f380f;
+  animation: correct-shake 0.3s ease;
+}
+
+.hand.wrong {
+  opacity: 0.5;
+}
+
+@keyframes correct-shake {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-5px); }
+  75% { transform: translateY(5px); }
+}
+
+/* SIMON GAME */
+.simon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.simon-btn {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #8bac0f;
+  border: 3px solid #306230;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #306230;
+  transition: all 0.1s ease;
+}
+
+.simon-btn.highlight {
+  background: #0f380f;
+  color: #9bbc0f;
+  transform: scale(1.1);
+}
+
+/* ============ ASCII ANIMATIONS ============ */
+
+/* Work spinner */
+.work-spinner {
+  font-family: 'Courier New', monospace;
+  font-size: 32px;
+  font-weight: bold;
+  color: #0f380f;
+  margin-bottom: 8px;
+}
+
+.work-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.work-dots {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #306230;
+  width: 24px;
+}
+
+/* Pet ASCII decorations */
+.ascii-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.decor-left {
+  position: absolute;
+  left: 20px;
+  top: 30%;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  color: #0f380f;
+}
+
+.decor-right {
+  position: absolute;
+  right: 20px;
+  top: 20%;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: #306230;
+}
+
+.decor-bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #306230;
+}
+
+/* Pet view needs relative positioning */
+.pet-view {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
