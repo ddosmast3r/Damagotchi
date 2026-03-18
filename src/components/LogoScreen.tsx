@@ -1,29 +1,29 @@
-import { useEffect, useRef } from 'react'
-import { playBeep } from '../utils/audio'
-import './LogoScreen.css'
+import { useEffect, useRef } from "react";
+import { playBeep } from "../utils/audio";
+import "./LogoScreen.css";
 
 interface LogoScreenProps {
-  onComplete: () => void
+  onComplete: () => void;
 }
 
 export function LogoScreen({ onComplete }: LogoScreenProps) {
-  const hasPlayedSound = useRef(false)
+  const hasPlayedSound = useRef(false);
 
   useEffect(() => {
     if (!hasPlayedSound.current) {
-      hasPlayedSound.current = true
-      playBeep(220, 0.1, 0)
-      playBeep(277, 0.1, 150)
-      playBeep(330, 0.1, 300)
-      playBeep(440, 0.15, 450)
-      playBeep(440, 0.3, 700)
-      playBeep(554, 0.3, 700)
-      playBeep(659, 0.3, 700)
+      hasPlayedSound.current = true;
+      playBeep(220, 0.1, 0);
+      playBeep(277, 0.1, 150);
+      playBeep(330, 0.1, 300);
+      playBeep(440, 0.15, 450);
+      playBeep(440, 0.3, 700);
+      playBeep(554, 0.3, 700);
+      playBeep(659, 0.3, 700);
     }
 
-    const timeout = setTimeout(onComplete, 3000)
-    return () => clearTimeout(timeout)
-  }, [onComplete])
+    const timeout = setTimeout(onComplete, 3000);
+    return () => clearTimeout(timeout);
+  }, [onComplete]);
 
   return (
     <div className="logo-screen">
@@ -66,18 +66,18 @@ export function LogoScreen({ onComplete }: LogoScreenProps) {
         {/* Text DAMAGOTCHI - using SVG text with same style */}
         <text
           className="logo-text"
-          x="500"
+          x="490"
           y="140"
           textAnchor="middle"
-          fontFamily="'Arial Black', 'Helvetica Bold', sans-serif"
-          fontSize="95"
-          fontWeight="900"
-          fontStyle="italic"
+          fontFamily="'04b', monospace"
+          fontSize="94"
+          fontWeight="normal"
+          fontStyle="normal"
           fill="#F4F4F4"
         >
           DAMAGOTCHI
         </text>
       </svg>
     </div>
-  )
+  );
 }

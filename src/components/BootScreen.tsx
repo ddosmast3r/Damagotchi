@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { playBeep } from "../utils/audio";
 import "./BootScreen.css";
+import biosSound from "../assets/sounds/bios-sound.mp4";
 
 interface BootScreenProps {
   onBootComplete: () => void;
@@ -48,14 +49,38 @@ export function BootScreen({ onBootComplete }: BootScreenProps) {
   });
   const [waitingForKey, setWaitingForKey] = useState(false);
   const hasPlayedBeep = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Play BIOS beep on start
+  // Play BIOS sound on start with fade out
   useEffect(() => {
     if (!hasPlayedBeep.current) {
       hasPlayedBeep.current = true;
-      // Classic BIOS POST beep
-      playBeep(1000, 0.2, 100);
+
+      const audio = new Audio(biosSound);
+      audio.volume = 0.7;
+      audioRef.current = audio;
+      audio.play().catch(() => {});
+
+      // Fade out function
+      const fadeOut = () => {
+        if (audio.volume > 0.05) {
+          audio.volume = Math.max(0, audio.volume - 0.05);
+          setTimeout(fadeOut, 100);
+        } else {
+          audio.pause();
+          audio.volume = 0;
+        }
+      };
+
+      // Start fade out 1 second before expected end or after 4 seconds
+      setTimeout(fadeOut, 4000);
     }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
   }, []);
 
   // Animation intervals
@@ -122,6 +147,19 @@ export function BootScreen({ onBootComplete }: BootScreenProps) {
     if (!waitingForKey) return;
 
     const handleInput = () => {
+      // Fade out BIOS sound quickly
+      if (audioRef.current) {
+        const audio = audioRef.current;
+        const quickFade = () => {
+          if (audio.volume > 0.1) {
+            audio.volume = Math.max(0, audio.volume - 0.1);
+            setTimeout(quickFade, 30);
+          } else {
+            audio.pause();
+          }
+        };
+        quickFade();
+      }
       playBeep(600, 0.05);
       onBootComplete();
     };

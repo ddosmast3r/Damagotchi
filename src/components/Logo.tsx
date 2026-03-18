@@ -56,7 +56,7 @@ export function Logo() {
         x="200"
         y="68"
         textAnchor="middle"
-        fontFamily="'Courier New', monospace"
+        fontFamily="'04b', monospace"
         fontSize="42"
         fontWeight="bold"
         fill="#F4F4F4"
