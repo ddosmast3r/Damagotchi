@@ -24,7 +24,7 @@ const BOOT_SEQUENCE: BootLine[] = [
   { text: "  Loading capitalism.dll", type: "progress" },
   { text: "  Loading responsibilities.sys", type: "progress" },
   { text: "  Loading existential_dread.exe", type: "progress" },
-  { text: "  Loading coffee_dependency.ko", type: "progress" },
+  { text: "  Loading antidepressant-addiction.ko", type: "progress" },
   { text: "  Loading thoughts-of-suicide.txt", type: "progress" },
   { text: "", type: "text" },
   { text: "Starting DAMAGOTCHI kernel", type: "spinner" },
