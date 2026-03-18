@@ -15,27 +15,26 @@ type BootLine = {
 const BOOT_SEQUENCE: BootLine[] = [
   { text: "", type: "text", delay: 200 },
   { text: "DAMAGOTCHI BIOS v1.0.3", type: "text" },
-  { text: "Copyright (C) 2026 Odissey Pogosov Inc.", type: "text" },
+  { text: "(C) 2026 Odissey Pogosov Inc.", type: "text" },
   { text: "", type: "text" },
-  { text: "CPU: EmotionCore 8086 @ 4.77 MHz", type: "text" },
+  { text: "CPU: EmotionCore 8086 @ 4.77MHz", type: "text" },
   { text: "Checking RAM", type: "memory" },
   { text: "", type: "text" },
-  { text: "Initializing devices", type: "dots" },
-  { text: "  Loading capitalism.dll", type: "progress" },
-  { text: "  Loading responsibilities.sys", type: "progress" },
-  { text: "  Loading existential_dread.exe", type: "progress" },
-  { text: "  Loading antidepressant-addiction.ko", type: "progress" },
-  { text: "  Loading thoughts-of-suicide.txt", type: "progress" },
+  { text: "Init devices", type: "dots" },
+  { text: "  capitalism.dll", type: "progress" },
+  { text: "  responsibilities.sys", type: "progress" },
+  { text: "  dread.exe", type: "progress" },
+  { text: "  depression.ko", type: "progress" },
   { text: "", type: "text" },
-  { text: "Starting DAMAGOTCHI kernel", type: "spinner" },
+  { text: "Starting kernel", type: "spinner" },
   { text: "", type: "text" },
-  { text: "[  OK  ] Started Adult Life Simulator", type: "ok" },
+  { text: "[  OK  ] Adult Life Simulator", type: "ok" },
   { text: "[  OK  ] Mounted /dev/emotions", type: "ok" },
-  { text: "[  OK  ] Started Existential Crisis Service", type: "ok" },
-  { text: "[FAILED] Started Happiness Service", type: "fail" },
-  { text: "[  OK  ] Reached target Multi-Stress Mode", type: "ok" },
+  { text: "[  OK  ] Crisis Service", type: "ok" },
+  { text: "[FAILED] Happiness Service", type: "fail" },
+  { text: "[  OK  ] Multi-Stress Mode", type: "ok" },
   { text: "", type: "text" },
-  { text: "System ready. Press any key...", type: "text" },
+  { text: "Ready. Press any key...", type: "text" },
 ];
 
 export function BootScreen({ onBootComplete }: BootScreenProps) {
@@ -152,12 +151,13 @@ export function BootScreen({ onBootComplete }: BootScreenProps) {
       );
 
     if (bootLine.type === "progress" && !line.complete) {
-      const filled = Math.floor(animState.progress / 5);
+      const barWidth = 10;
+      const filled = Math.floor(animState.progress / (100 / barWidth));
       const bar =
         "[" +
         "=".repeat(filled) +
-        ">".repeat(filled < 20 ? 1 : 0) +
-        " ".repeat(Math.max(0, 20 - filled - 1)) +
+        ">".repeat(filled < barWidth ? 1 : 0) +
+        " ".repeat(Math.max(0, barWidth - filled - 1)) +
         "]";
       return (
         <div key={idx} className="boot-line">
@@ -169,7 +169,7 @@ export function BootScreen({ onBootComplete }: BootScreenProps) {
     if (bootLine.type === "progress" && line.complete) {
       return (
         <div key={idx} className="boot-line">
-          {line.text} [====================] 100%
+          {line.text} [==========] 100%
         </div>
       );
     }
