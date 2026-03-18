@@ -1,0 +1,117 @@
+/* CRT Container */
+.crt-container {
+  position: fixed;
+  inset: 0;
+  background: #0a0a12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  overflow: hidden;
+}
+
+/* CRT Screen - Balatro style */
+.crt-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+
+  /* Soft glow */
+  box-shadow:
+    0 0 60px rgba(100, 140, 255, 0.15),
+    0 0 100px rgba(100, 140, 255, 0.1);
+
+  animation: screen-on 0.4s ease-out;
+}
+
+/* Screen turn on */
+@keyframes screen-on {
+  0% {
+    transform: scaleY(0.005);
+    filter: brightness(2);
+    opacity: 0;
+  }
+  40% {
+    transform: scaleY(0.005);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    filter: brightness(1);
+  }
+}
+
+/* Overlay container */
+.crt-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 100;
+}
+
+/* Subtle scanlines - visible on bright backgrounds */
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+}
+
+/* Vignette - stronger */
+.crt-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(0, 0, 0, 0.25) 70%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+/* Inner shadow for depth */
+.crt-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+}
+
+/* Soft bloom pulse */
+.crt-glow::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(100, 140, 255, 0.04) 0%,
+    transparent 60%
+  );
+  animation: bloom 4s ease-in-out infinite;
+}
+
+@keyframes bloom {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Screen content */
+.crt-screen > *:first-child {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}

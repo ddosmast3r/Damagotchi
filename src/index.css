@@ -14,10 +14,16 @@
 
 body {
   font-family: 'Courier New', monospace;
-  background: var(--bg-color);
+  background: #000;
   color: var(--text-color);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+}
+
+html {
+  overflow: hidden;
 }
 
 .app {

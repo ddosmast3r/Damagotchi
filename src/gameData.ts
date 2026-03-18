@@ -1,16 +1,14 @@
 // ===== GAME DATA & TYPES =====
 
 // Item types
-type ItemType = 'food' | 'toy' | 'medicine' | 'accessory'
+type ItemType = 'food' | 'drink' | 'entertainment' | 'medicine'
 
 export interface ShopItem {
   id: string
   name: string
   type: ItemType
   price: number
-  icon: string
   description: string
-  // Effects when used
   effects: {
     hunger?: number
     happiness?: number
@@ -19,167 +17,261 @@ export interface ShopItem {
   }
 }
 
-// Shop items catalog
+// Shop items - adult life themed
 export const SHOP_ITEMS: ShopItem[] = [
   // Food
   {
-    id: 'bread',
-    name: 'Bread',
+    id: 'ramen',
+    name: 'Instant Ramen',
     type: 'food',
     price: 5,
-    icon: '🍞',
-    description: 'Simple bread. +10 hunger',
+    description: 'Cheap and sad. +10 hunger',
     effects: { hunger: 10 }
   },
   {
-    id: 'apple',
-    name: 'Apple',
+    id: 'sandwich',
+    name: 'Sandwich',
     type: 'food',
-    price: 8,
-    icon: '🍎',
-    description: 'Fresh apple. +15 hunger, +5 health',
-    effects: { hunger: 15, health: 5 }
+    price: 12,
+    description: 'Quick lunch. +20 hunger',
+    effects: { hunger: 20 }
   },
   {
     id: 'pizza',
     name: 'Pizza',
     type: 'food',
-    price: 15,
-    icon: '🍕',
-    description: 'Tasty pizza! +25 hunger, +10 happiness',
+    price: 20,
+    description: 'Comfort food. +25 hunger, +10 happiness',
     effects: { hunger: 25, happiness: 10 }
   },
   {
-    id: 'cake',
-    name: 'Cake',
+    id: 'steak',
+    name: 'Steak Dinner',
     type: 'food',
-    price: 25,
-    icon: '🍰',
-    description: 'Birthday cake! +20 hunger, +20 happiness',
-    effects: { hunger: 20, happiness: 20 }
+    price: 50,
+    description: 'Treat yourself. +40 hunger, +15 happiness',
+    effects: { hunger: 40, happiness: 15 }
+  },
+
+  // Drinks
+  {
+    id: 'coffee',
+    name: 'Coffee',
+    type: 'drink',
+    price: 8,
+    description: 'Morning fuel. +20 energy, -5 health',
+    effects: { energy: 20, health: -5 }
   },
   {
     id: 'energy_drink',
     name: 'Energy Drink',
-    type: 'food',
-    price: 20,
-    icon: '🥤',
-    description: 'BOOST! +30 energy, -5 health',
-    effects: { energy: 30, health: -5 }
+    type: 'drink',
+    price: 15,
+    description: 'Heart attack in a can. +35 energy, -10 health',
+    effects: { energy: 35, health: -10 }
+  },
+  {
+    id: 'beer',
+    name: 'Beer',
+    type: 'drink',
+    price: 10,
+    description: 'Liquid therapy. +15 happiness, -10 energy',
+    effects: { happiness: 15, energy: -10 }
   },
 
-  // Toys
+  // Entertainment
   {
-    id: 'ball',
-    name: 'Ball',
-    type: 'toy',
-    price: 30,
-    icon: '⚽',
-    description: 'Play ball! +20 happiness, -10 energy',
+    id: 'netflix',
+    name: 'Netflix',
+    type: 'entertainment',
+    price: 15,
+    description: 'Binge watching. +20 happiness, -10 energy',
     effects: { happiness: 20, energy: -10 }
   },
   {
-    id: 'gameboy',
-    name: 'Game Boy',
-    type: 'toy',
-    price: 50,
-    icon: '🎮',
-    description: 'Gaming time! +30 happiness, -15 energy',
+    id: 'game',
+    name: 'Video Game',
+    type: 'entertainment',
+    price: 25,
+    description: 'Escape reality. +30 happiness, -15 energy',
     effects: { happiness: 30, energy: -15 }
   },
   {
-    id: 'book',
-    name: 'Book',
-    type: 'toy',
+    id: 'gym',
+    name: 'Gym Session',
+    type: 'entertainment',
     price: 20,
-    icon: '📚',
-    description: 'Reading is fun! +15 happiness, -5 energy',
-    effects: { happiness: 15, energy: -5 }
+    description: 'Pain is gain. +10 happiness, +15 health, -20 energy',
+    effects: { happiness: 10, health: 15, energy: -20 }
   },
 
   // Medicine
   {
-    id: 'bandage',
-    name: 'Bandage',
+    id: 'aspirin',
+    name: 'Aspirin',
     type: 'medicine',
     price: 10,
-    icon: '🩹',
-    description: 'First aid. +15 health',
+    description: 'For the headache. +15 health',
     effects: { health: 15 }
   },
   {
-    id: 'medicine',
-    name: 'Medicine',
-    type: 'medicine',
-    price: 30,
-    icon: '💊',
-    description: 'Strong medicine. +30 health',
-    effects: { health: 30 }
-  },
-  {
-    id: 'vitamin',
+    id: 'vitamins',
     name: 'Vitamins',
     type: 'medicine',
-    price: 40,
-    icon: '💉',
-    description: 'Full recovery! +50 health',
-    effects: { health: 50 }
+    price: 25,
+    description: 'Daily health. +25 health',
+    effects: { health: 25 }
+  },
+  {
+    id: 'therapy',
+    name: 'Therapy Session',
+    type: 'medicine',
+    price: 100,
+    description: 'Mental health matters. +30 health, +20 happiness',
+    effects: { health: 30, happiness: 20 }
   },
 ]
 
-// Work/Jobs for earning coins
+// Jobs
 export interface Job {
   id: string
   name: string
-  icon: string
   description: string
-  duration: number // seconds
-  reward: number // coins
+  duration: number // seconds to complete
+  reward: number
   energyCost: number
+  happinessCost: number
 }
 
 export const JOBS: Job[] = [
   {
-    id: 'sweep',
-    name: 'Sweep Floor',
-    icon: '🧹',
-    description: 'Easy work, small pay',
+    id: 'gig',
+    name: 'Gig Work',
+    description: 'Deliver food. Flexible but unstable.',
+    duration: 3,
+    reward: 15,
+    energyCost: 10,
+    happinessCost: 5
+  },
+  {
+    id: 'freelance',
+    name: 'Freelance',
+    description: 'Work from home. Decent pay.',
     duration: 5,
-    reward: 10,
-    energyCost: 5
+    reward: 30,
+    energyCost: 15,
+    happinessCost: 10
   },
   {
-    id: 'dishes',
-    name: 'Wash Dishes',
-    icon: '🍽️',
-    description: 'Medium work',
+    id: 'office',
+    name: 'Office Job',
+    description: 'Cubicle life. Stable income.',
     duration: 8,
-    reward: 20,
-    energyCost: 10
-  },
-  {
-    id: 'garden',
-    name: 'Garden Work',
-    icon: '🌱',
-    description: 'Hard but rewarding',
-    duration: 12,
-    reward: 35,
-    energyCost: 20
-  },
-  {
-    id: 'code',
-    name: 'Write Code',
-    icon: '💻',
-    description: 'Brain power!',
-    duration: 15,
     reward: 50,
-    energyCost: 25
+    energyCost: 25,
+    happinessCost: 15
+  },
+  {
+    id: 'overtime',
+    name: 'Overtime',
+    description: 'Extra hours. Draining but pays well.',
+    duration: 10,
+    reward: 80,
+    energyCost: 40,
+    happinessCost: 25
   },
 ]
 
+// Random events
+export interface GameEvent {
+  id: string
+  title: string
+  description: string
+  effects: {
+    coins?: number
+    hunger?: number
+    happiness?: number
+    energy?: number
+    health?: number
+  }
+  chance: number // 0-1 probability per day
+}
+
+export const RANDOM_EVENTS: GameEvent[] = [
+  // Bad events
+  {
+    id: 'car_broke',
+    title: 'Car Trouble',
+    description: 'Your car broke down. Repair costs.',
+    effects: { coins: -50 },
+    chance: 0.1
+  },
+  {
+    id: 'sick',
+    title: 'Got Sick',
+    description: 'Caught a cold. Feel terrible.',
+    effects: { health: -20, energy: -15 },
+    chance: 0.1
+  },
+  {
+    id: 'tax',
+    title: 'Surprise Tax',
+    description: 'Tax season. Pay up.',
+    effects: { coins: -30 },
+    chance: 0.08
+  },
+  {
+    id: 'insomnia',
+    title: 'Insomnia',
+    description: 'Could not sleep well.',
+    effects: { energy: -20 },
+    chance: 0.12
+  },
+  // Good events
+  {
+    id: 'bonus',
+    title: 'Work Bonus',
+    description: 'Got a small bonus at work!',
+    effects: { coins: 40 },
+    chance: 0.08
+  },
+  {
+    id: 'found_money',
+    title: 'Lucky Day',
+    description: 'Found money on the street.',
+    effects: { coins: 20, happiness: 10 },
+    chance: 0.05
+  },
+  {
+    id: 'good_sleep',
+    title: 'Great Sleep',
+    description: 'Slept like a baby.',
+    effects: { energy: 20, health: 10 },
+    chance: 0.1
+  },
+]
+
+// Game constants
+export const GAME_CONFIG = {
+  RENT_AMOUNT: 100,
+  RENT_INTERVAL_DAYS: 7,
+  ACTIONS_PER_DAY: 5,
+  SLEEP_ENERGY_RESTORE: 60,
+  STAT_DECAY_PER_DAY: {
+    hunger: 15,
+    happiness: 10,
+    energy: 0, // handled by sleep
+    health: 0, // depends on other stats
+  },
+  CRITICAL_STAT_THRESHOLD: 20,
+  HEALTH_DECAY_WHEN_CRITICAL: 10,
+}
+
 // Game state
-interface GameState {
+export interface GameState {
   coins: number
+  day: number
+  actionsLeft: number
   inventory: { [itemId: string]: number }
   petState: {
     hunger: number
@@ -187,16 +279,27 @@ interface GameState {
     energy: number
     health: number
   }
+  nextRentDay: number
+  isGameOver: boolean
+  gameOverReason: string | null
 }
 
 // Initial game state
 export const INITIAL_GAME_STATE: GameState = {
-  coins: 50,
-  inventory: {},
+  coins: 100,
+  day: 1,
+  actionsLeft: 5,
+  inventory: {
+    'ramen': 2,
+    'coffee': 2,
+  },
   petState: {
-    hunger: 80,
-    happiness: 70,
-    energy: 90,
+    hunger: 70,
+    happiness: 60,
+    energy: 80,
     health: 100,
   },
+  nextRentDay: 7,
+  isGameOver: false,
+  gameOverReason: null,
 }
